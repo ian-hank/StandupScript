@@ -4,5 +4,7 @@
 
 #include "tokens.h"
 
-std::string tokenTypeToString();
-void printTokens(std::vector<Token>& tokens);
+namespace TokenUtils {
+    std::string tokenTypeToString(TokenType);
+    void printTokens(std::vector<Token>&);
+}

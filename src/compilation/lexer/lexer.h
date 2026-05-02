@@ -15,7 +15,7 @@
 
             char peek();
             bool withinBounds();
-            void hopLine(int amount = 1);
+            void hopLine(int = 1); // is this convention?
             
             Token readIdentifierOrKeyword();
             

@@ -4,6 +4,9 @@
 #include <string>
 
 #include "lexer.h"
+#include "token_utils.h"
+
+const bool LEXER_DEBUG = true;
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -25,6 +28,9 @@ int main(int argc, char* argv[]) {
     std::vector<Token> tokens;
     try {
         tokens = lexer.tokenize();
+        if (LEXER_DEBUG) {
+            TokenUtils::printTokens(tokens);
+        }
     } catch(const std::exception& e) {
         std::cerr << "StandupScript Error (lexing): " << e.what() << std::endl;
         return EXIT_FAILURE;

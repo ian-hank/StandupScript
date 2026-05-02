@@ -25,10 +25,10 @@ enum class TokenType {
 
     // Keywords (reserved)
     kw_standup,             // 'standup'
-    //kw_meeting,             // 'meeting'
+    kw_meeting,             // 'meeting'
     kw_date,                // 'date'
-    //kw_time,                // 'time'
-    //kw_timezone,            // 'timezone
+    kw_time,                // 'time'
+    kw_timezone,            // 'timezone
     kw_tag,                 // 'tag'
     kw_attendee,            // 'attendee'
     kw_as,                  // 'as'
