@@ -3,3 +3,6 @@ input.stup
 
 # CMAKE Related
 /build
+
+# Editor Related
+.vscode/*

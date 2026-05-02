@@ -8,6 +8,7 @@ set (COMPILATION_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/compilation)
 
 add_executable(standupc
     src/main.cpp
+    ${COMPILATION_DIR}/lexer/lexer.cpp
 )
 
 target_include_directories(standupc PRIVATE
