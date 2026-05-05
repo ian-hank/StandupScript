@@ -1,33 +1,99 @@
 #include <cctype>
+#include <iostream>
+#include <regex>
 
 #include "lexer.h"
 #include "lexer_constants.h"
 
 // primary tokenizer
 std::vector<Token> Lexer::tokenize() {    
-    while (position < input.length()) {
+    while (withinBounds()) {
         char current = peek();
+        if (isNewLine()) continue;
+        // if is comment (are we even gonna support comments)
+        if (isWhiteSpace()) continue;
         
         if (std::isalpha(current)) tokens.push_back(readIdentifierOrKeyword());
-        else hopLine();
+        else if (isDateLiteral(current)) tokens.push_back(readDateLiteral());
+        else if (isStrLiteral(current)) tokens.push_back(readStringLiteral());
+        else if (isSeparator(current)) tokens.push_back(readSeparator());
+        else {
+            std::cerr << "StandupScript Error (lexer): Unrecognized character '" << current << "' at line " << line << ", column " << column << "\n";
+            exit(EXIT_FAILURE);
+        }
     }
 
     return tokens;
 }
 
 // utilities 
+char Lexer::peek() {
+    return withinBounds() ? input[position] : '\0';
+}
+
+char Lexer::spy() {
+    return withinBounds(1) ? input[position + 1] : '\0';
+}
+
+void Lexer::hop(int amount) {
+    position += amount;
+    column += amount;
+}
+
+
 void Lexer::hopLine(int amount) {
     position += amount;
     column = 1;
     line += 1;
 }
 
-bool Lexer::withinBounds() {
-    return position < static_cast<int>(input.size());
+bool Lexer::withinBounds(int amount) {
+    return (position + amount) < static_cast<int>(input.size());
 }
 
-char Lexer::peek() {
-    return withinBounds() ? input[position] : '\0';
+bool Lexer::isNewLine() {
+    char current = peek();
+
+    if (current == '\n') {
+        hopLine();
+        return true;
+    } else if (current == '\r' and spy() == '\n') {
+        hopLine();
+        return true;
+    }
+
+    return false;
+}
+
+bool Lexer::isWhiteSpace() {
+    if (std::isspace(peek())) {
+        hop();
+        return true;
+    }
+
+    return false;
+}
+
+bool Lexer::isDateLiteral(char current) {
+    if (!std::isdigit(current)) {
+        return false;
+    }
+
+    std::string date = input.substr(position, 10);
+    std::regex datePattern(R"([0-9]{4}-[0-9]{2}-[0-9]{2})");
+    if (std::regex_match(date, datePattern)) {
+        return true;
+    }
+
+    return false;
+}
+
+bool Lexer::isStrLiteral(char current) {
+    return current == '\"';
+}
+
+bool Lexer::isSeparator(char current) {
+    return LexerConstants::separators.count(current);
 }
 
 // readers 
@@ -35,18 +101,61 @@ Token Lexer::readIdentifierOrKeyword() {
     Token token;
     std::string buffer;
 
+    token.line = line;
+    token.column = column;
     while (withinBounds() && std::isalnum(peek())) {
         buffer.push_back(peek());
-        position++;
-        column++;
+        hop();
     }
 
-    if(LexerConstants::keywords.count(buffer)) {
+    if (LexerConstants::keywords.count(buffer)) {
         token.tokenType = LexerConstants::keywords.at(buffer);
     } else {
         token.tokenType = TokenType::identifier;
         token.value = buffer;
     }
 
+    return token;
+}
+
+Token Lexer::readStringLiteral() {
+    Token token;
+    std::string buffer;
+
+    token.line = line;
+    token.column = column;
+    hop();
+    
+    while (peek() != '\"') {
+        buffer.push_back(peek());
+        hop();
+    }
+
+    hop();
+    token.tokenType = TokenType::lit_string;
+    token.value = buffer;
+
+    return token;
+}
+
+Token Lexer::readDateLiteral() {
+    Token token;
+
+    token.line = line;
+    token.column = column;
+    token.tokenType = TokenType::lit_date;
+    token.value = input.substr(position, 10);
+
+    hop(10);
+    return token;
+}
+
+Token Lexer::readSeparator() {
+    Token token;
+    token.line = line;
+    token.column = column;
+    token.tokenType = LexerConstants::separators.at(peek());
+
+    hop();
     return token;
 }

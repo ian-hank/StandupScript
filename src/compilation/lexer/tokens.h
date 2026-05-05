@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+
 enum class TokenType {
     // Identifiers
     eof,                    // end of file
@@ -34,6 +35,17 @@ enum class TokenType {
     kw_as,                  // 'as'
     kw_summary,             // 'summary'
     kw_note,                // 'note'
+    kw_section,             // 'section'
+    kw_decision,            // 'decision'
+    kw_todo,                // 'todo'
+    kw_by,                  // 'by'
+    kw_priority,            // 'priority'
+    kw_high,                // 'high'
+    kw_medium,              // 'medium'
+    kw_low,                 // 'low'
+    kw_blocker,             // 'blocker'
+    kw_risk,                // 'risk'
+    kw_link,                // 'link'
     };
 
 struct Token {

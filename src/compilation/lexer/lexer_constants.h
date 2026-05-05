@@ -14,4 +14,15 @@ namespace LexerConstants {
         { "summary", TokenType::kw_summary },
         { "tag", TokenType::kw_tag },
     };
+
+    const std::unordered_map<char, TokenType> separators = {
+        { '{', TokenType::left_curly_bracket },
+        { '}', TokenType::right_curly_bracket },
+        { '(', TokenType::left_parenthese },
+        { ')', TokenType::right_parentheses },
+        { ',', TokenType::comma },
+        { ':', TokenType::colon },
+        { ';', TokenType::semicolon },
+        { '@', TokenType::at },
+    };
 }
