@@ -4,7 +4,7 @@
 #include "token_utils.h"
 #include "tokens.h"
 
-std::string TokenUtils::tokenTypeToString(TokenType type) {
+std::string TokenUtils::tokenTypeToString(const TokenType& type) {
     switch (type) {
         // Identifiers
         case TokenType::eof:                    return "eof";
@@ -52,7 +52,7 @@ std::string TokenUtils::tokenTypeToString(TokenType type) {
     }
 }
 
-void TokenUtils::printTokens(std::vector<Token>& tokens) {
+void TokenUtils::printTokens(const std::vector<Token>& tokens) {
     std::cout << "================ TOKENS =================\n";
     for (int i = 0; i < static_cast<int>(tokens.size()); i++) {
         std::cout 
