@@ -18,14 +18,25 @@ std::string TokenUtils::tokenTypeToString(TokenType type) {
         // Keywords
         case TokenType::kw_as:                  return "kw_as";
         case TokenType::kw_attendee:            return "kw_attendee";
+        case TokenType::kw_blocker:             return "kw_blocker";
+        case TokenType::kw_by:                  return "kw_by";
         case TokenType::kw_date:                return "kw_date";
+        case TokenType::kw_decision:            return "kw_decision";
+        case TokenType::kw_high:                return "kw_high";
+        case TokenType::kw_link:                return "kw_link";
+        case TokenType::kw_low:                 return "kw_low";
+        case TokenType::kw_medium:              return "kw_medium";
         case TokenType::kw_meeting:             return "kw_meeting";
         case TokenType::kw_note:                return "kw_note";
+        case TokenType::kw_priority:            return "kw_priority";
+        case TokenType::kw_risk:                return "kw_risk";
+        case TokenType::kw_section:             return "kw_section";
         case TokenType::kw_standup:             return "kw_standup";
         case TokenType::kw_summary:             return "kw_summary";
-        case TokenType::kw_time:                return "kw_summary";
-        case TokenType::kw_timezone:            return "kw_summary";
         case TokenType::kw_tag:                 return "kw_tag";
+        case TokenType::kw_time:                return "kw_time";
+        case TokenType::kw_timezone:            return "kw_timezone";
+        case TokenType::kw_todo:                return "kw_todo";
 
         // Separators 
         case TokenType::left_curly_bracket:     return "left_curly_bracket";
