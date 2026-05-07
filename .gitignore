@@ -6,3 +6,6 @@ input.stup
 
 # Editor Related
 .vscode/*
+
+# OS Related
+.DS_Store

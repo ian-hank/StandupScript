@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 
 #include "token_utils.h"
 #include "tokens.h"
@@ -55,12 +56,19 @@ std::string TokenUtils::tokenTypeToString(const TokenType& type) {
 void TokenUtils::printTokens(const std::vector<Token>& tokens) {
     std::cout << "================ TOKENS =================\n";
     for (int i = 0; i < static_cast<int>(tokens.size()); i++) {
+        const Token& token = tokens[i];
+
+        std::ostringstream tokenLocation;
+        tokenLocation << token.line << ':' << token.column;
+
         std::cout 
             << '[' << std::setw(3) << std::setfill('0') << i + 1 << "] "
-            << std::left << std::setfill(' ')
-            << std::setw(14) << tokenTypeToString(tokens[i].tokenType)
-            << " @ " << tokens[i].line << ':' << tokens[i].column << " "
-            << "\"" << tokens[i].value.value_or("null")  << "\""
+            << std::right << std::setfill(' ')
+            << std::setw(19) << tokenTypeToString(token.tokenType)
+            << " @ " 
+            << std::left << std::setw(7) << tokenLocation.str() // has to be a better way of handling this lol
+            << " "
+            << '"' << token.value.value_or("") << '"'
             << '\n';
     }
 }

@@ -20,7 +20,7 @@
             bool isNewLine();
             bool isWhiteSpace();
             bool isDateLiteral(char);
-            bool isStrLiteral(char);
+            bool isStringDelimiter(char);
             bool isSeparator(char);
 
             void hop(int = 1);

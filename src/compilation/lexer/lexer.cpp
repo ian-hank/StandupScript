@@ -10,15 +10,17 @@ std::vector<Token> Lexer::tokenize() {
     while (withinBounds()) {
         char current = peek();
         if (isNewLine()) continue;
-        // if is comment (are we even gonna support comments)
         if (isWhiteSpace()) continue;
         
         if (std::isalpha(current)) tokens.push_back(readIdentifierOrKeyword());
         else if (isDateLiteral(current)) tokens.push_back(readDateLiteral());
-        else if (isStrLiteral(current)) tokens.push_back(readStringLiteral());
+        else if (isStringDelimiter(current)) tokens.push_back(readStringLiteral());
         else if (isSeparator(current)) tokens.push_back(readSeparator());
         else {
-            std::cerr << "StandupScript Error (lexer): Unrecognized character '" << current << "' at line " << line << ", column " << column << "\n";
+            std::cerr 
+                << "StandupScript Error (lexer): Unrecognized character '" << current 
+                << "' at line " << line 
+                << ", column " << column;
             exit(EXIT_FAILURE);
         }
     }
@@ -88,7 +90,7 @@ bool Lexer::isDateLiteral(char current) {
     return false;
 }
 
-bool Lexer::isStrLiteral(char current) {
+bool Lexer::isStringDelimiter(char current) {
     return current == '\"';
 }
 
@@ -110,12 +112,18 @@ Token Lexer::readIdentifierOrKeyword() {
 
     if (LexerConstants::keywords.count(buffer)) {
         token.tokenType = LexerConstants::keywords.at(buffer);
+        return token;
     } else {
         token.tokenType = TokenType::identifier;
         token.value = buffer;
+        return token;
     }
 
-    return token;
+    std::cerr 
+            << "StandupScript Error (lexer): Problem parsing identifier or keyword" 
+            << " at line " << line 
+            << ", column " << column;
+
 }
 
 Token Lexer::readStringLiteral() {
@@ -126,6 +134,14 @@ Token Lexer::readStringLiteral() {
     token.column = column;
     hop();
     
+    if (input.find('\"', position) == std::string::npos) {
+        std::cerr 
+            << "StandupScript Error (lexer): String is never closed" 
+            << " at line " << line 
+            << ", column " << column;
+        exit(EXIT_FAILURE);
+    }
+
     while (peek() != '\"') {
         buffer.push_back(peek());
         hop();
