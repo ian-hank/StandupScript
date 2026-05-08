@@ -5,13 +5,22 @@
 #include "lexer.h"
 #include "lexer_constants.h"
 
+const bool LEXER_DEBUG = true;
+
 // primary tokenizer
 std::vector<Token> Lexer::tokenize() {    
     while (withinBounds()) {
-        char current = peek();
-        if (isNewLine()) continue;
-        if (isWhiteSpace()) continue;
+        if (isNewLine()) {
+            advanceLine();
+            continue;
+        }
+
+        if (isWhiteSpace()) {
+            hop();
+            continue;
+        }
         
+        char current = peek();
         if (std::isalpha(current)) tokens.push_back(readIdentifierOrKeyword());
         else if (isDateLiteral(current)) tokens.push_back(readDateLiteral());
         else if (isStringDelimiter(current)) tokens.push_back(readStringLiteral());
@@ -38,15 +47,21 @@ char Lexer::spy() {
 }
 
 void Lexer::hop(int amount) {
-    position += amount;
-    column += amount;
+        position += amount;
+        column += amount;
 }
 
+void Lexer::advanceLine() {
+    if (peek() == '\r' and spy() == '\n') {
+        position += 2;
+        line++;
+        column = 1;
+        return;
+    }
 
-void Lexer::hopLine(int amount) {
-    position += amount;
+    position++;
+    line++;
     column = 1;
-    line += 1;
 }
 
 bool Lexer::withinBounds(int amount) {
@@ -57,10 +72,8 @@ bool Lexer::isNewLine() {
     char current = peek();
 
     if (current == '\n') {
-        hopLine();
         return true;
     } else if (current == '\r' and spy() == '\n') {
-        hopLine();
         return true;
     }
 
@@ -68,12 +81,7 @@ bool Lexer::isNewLine() {
 }
 
 bool Lexer::isWhiteSpace() {
-    if (std::isspace(peek())) {
-        hop();
-        return true;
-    }
-
-    return false;
+    return std::isspace(peek());
 }
 
 bool Lexer::isDateLiteral(char current) {
@@ -83,11 +91,11 @@ bool Lexer::isDateLiteral(char current) {
 
     std::string date = input.substr(position, 10);
     std::regex datePattern(R"([0-9]{4}-[0-9]{2}-[0-9]{2})");
-    if (std::regex_match(date, datePattern)) {
-        return true;
+    if (!std::regex_match(date, datePattern)) {
+        return false;
     }
-
-    return false;
+    
+    return true;
 }
 
 bool Lexer::isStringDelimiter(char current) {
@@ -113,17 +121,11 @@ Token Lexer::readIdentifierOrKeyword() {
     if (LexerConstants::keywords.count(buffer)) {
         token.tokenType = LexerConstants::keywords.at(buffer);
         return token;
-    } else {
-        token.tokenType = TokenType::identifier;
-        token.value = buffer;
-        return token;
     }
 
-    std::cerr 
-            << "StandupScript Error (lexer): Problem parsing identifier or keyword" 
-            << " at line " << line 
-            << ", column " << column;
-
+    token.tokenType = TokenType::identifier;
+    token.value = buffer;
+    return token;
 }
 
 Token Lexer::readStringLiteral() {

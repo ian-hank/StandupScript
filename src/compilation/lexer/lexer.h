@@ -24,7 +24,7 @@
             bool isSeparator(char);
 
             void hop(int = 1);
-            void hopLine(int = 1);
+            void advanceLine();
             
             Token readIdentifierOrKeyword();
             Token readStringLiteral();
