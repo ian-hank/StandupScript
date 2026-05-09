@@ -10,8 +10,12 @@ add_executable(standupc
     src/main.cpp
     ${COMPILATION_DIR}/lexer/lexer.cpp
     ${COMPILATION_DIR}/lexer/token_utils.cpp
+
+    #${COMPILATION_DIR}/parser/parser.cpp
 )
 
 target_include_directories(standupc PRIVATE
     ${COMPILATION_DIR}/lexer
+    ${COMPILATION_DIR}/parser
+    ${COMPILATION_DIR}/ast
 )
