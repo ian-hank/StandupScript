@@ -1,7 +1,7 @@
 # StandupScript Language Specification
 
 **Status:** Draft
-**Last updated:** 2028-04-28
+**Last updated:** 2028-05-05
 **Language name:** StandupScript  
 **Canonical file extension:** `.stup`  
 **Supported file extension aliases:** `.standup`  
@@ -15,8 +15,8 @@ Semicolons are optional and should be accepted but NOT required.
 
 ```txt
 EOF
-
 Identifier
+
 StringLiteral
 DateLiteral
 TimeLiteral
@@ -30,14 +30,25 @@ Colon           :
 Semicolon       ;
 At              @
 
-KeywordStandup
-KeywordMeeting
+KeywordAs
+KeywordAttendee
+KeywordBlocker
+KeywordBy
 KeywordDate
+KeywordDecision
+KeywordHigh
+KeywordLink
+KeywordLow
+KeywordMedium
+KeywordMeeting
+KeywordNote
+KeywordPriority
+KeywordRisk
+KeywordSection
+KeywordStandup
+KeywordSummary
+KeywordTag
 KeywordTime
 KeywordTimezone
-KeywordTag
-KeywordAttendee
-KeywordAs
-KeywordSummary
-KeywordNote
+KeywordTodo
 ```

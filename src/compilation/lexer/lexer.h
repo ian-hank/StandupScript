@@ -14,10 +14,22 @@
             std::vector<Token> tokens;
 
             char peek();
-            bool withinBounds();
-            void hopLine(int amount = 1);
+            char spy();
+            bool withinBounds(int = 0); // may just want a withinSpyBounds();
+
+            bool isNewLine();
+            bool isWhiteSpace();
+            bool isDateLiteral(char);
+            bool isStringDelimiter(char);
+            bool isSeparator(char);
+
+            void hop(int = 1);
+            void advanceLine();
             
             Token readIdentifierOrKeyword();
+            Token readStringLiteral();
+            Token readDateLiteral();
+            Token readSeparator();
             
         public:
             Lexer(const std::string& input) : input(input) {}
