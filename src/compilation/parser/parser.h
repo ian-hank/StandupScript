@@ -10,16 +10,17 @@ class Parser {
 
         const Token& current();
         const Token& previous();
+        const Token& advance();
+        const Token& consume(TokenType, const std::string&);
 
         bool isAtEnd();
         bool check(TokenType);
         bool match(TokenType);
 
-        const Token& advance();
-        const Token& consume(TokenType, const std::string&);
-
     public:
         explicit Parser(std::vector<Token> tokens);
+
         ProgramNode parseProgram();
+        StandupNode parseStandup();
 
 };
