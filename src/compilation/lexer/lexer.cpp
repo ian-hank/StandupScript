@@ -19,7 +19,7 @@ std::vector<Token> Lexer::tokenize() {
             hop();
             continue;
         }
-        
+
         char current = peek();
         if (std::isalpha(current)) tokens.push_back(readIdentifierOrKeyword());
         else if (isDateLiteral(current)) tokens.push_back(readDateLiteral());
@@ -33,6 +33,12 @@ std::vector<Token> Lexer::tokenize() {
             exit(EXIT_FAILURE);
         }
     }
+
+    tokens.push_back({
+        .tokenType = TokenType::eof, 
+        .line = line,
+        .column = column,
+    });
 
     return tokens;
 }
