@@ -23,4 +23,9 @@ class Parser {
         ProgramNode parseProgram();
         StandupNode parseStandup();
 
+        std::unique_ptr<StatementNode> parseStatement();
+        std::unique_ptr<DateStatementNode> parseDateStatement();
+        std::unique_ptr<TagStatementNode> parseTagStatement();
+        std::unique_ptr<AttendeeStatementNode> parseAttendeeStatement();
+        std::unique_ptr<SummaryStatementNode> parseSummaryStatement();
 };
