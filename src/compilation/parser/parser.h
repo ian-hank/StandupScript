@@ -28,4 +28,11 @@ class Parser {
         std::unique_ptr<TagStatementNode> parseTagStatement();
         std::unique_ptr<AttendeeStatementNode> parseAttendeeStatement();
         std::unique_ptr<SummaryStatementNode> parseSummaryStatement();
+        std::unique_ptr<SectionStatementNode> parseSectionStatement();
+        std::unique_ptr<NoteStatementNode> parseNoteStatement();
+        std::unique_ptr<DecisionStatementNode> parseDecisionStatement();
+        std::unique_ptr<TodoStatementNode> parseTodoStatement();
+        std::unique_ptr<BlockerStatementNode> parseBlockerStatement();
+        std::unique_ptr<RiskStatementNode> parseRiskStatement();
+        std::unique_ptr<LinkStatementNode> parseLinkStatement();
 };

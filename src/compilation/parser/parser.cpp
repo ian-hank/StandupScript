@@ -7,7 +7,12 @@ ProgramNode Parser::parseProgram() {
     ProgramNode pNode;
     pNode.standup = parseStandup();
 
-    consume(TokenType::eof, "Expected end of file after standup block.");
+    consume(
+        TokenType::eof,
+        "Expected end of input after standup block."
+    );
+
+    return pNode;
 }
 
 StandupNode Parser::parseStandup() {
@@ -32,6 +37,13 @@ StandupNode Parser::parseStandup() {
     while (!check(TokenType::right_curly_bracket) && !isAtEnd()) {
         sNode.statements.push_back(parseStatement());
     }
+
+    consume(
+        TokenType::right_curly_bracket,
+        "Expected '}' to end standup block."
+    );
+
+    return sNode;
 }
 
 std::unique_ptr<StatementNode> Parser::parseStatement() {
@@ -44,6 +56,10 @@ std::unique_ptr<StatementNode> Parser::parseStatement() {
             return parseTagStatement();
         }
 
+        case TokenType::kw_section: {
+            return parseSectionStatement();
+        }
+
         case TokenType::kw_attendee: {
             return parseAttendeeStatement();
         }
@@ -52,7 +68,31 @@ std::unique_ptr<StatementNode> Parser::parseStatement() {
             return parseSummaryStatement();
         }
 
-        
+        case TokenType::kw_note: {
+            return parseNoteStatement();
+        }
+
+        case TokenType::kw_decision: {
+            return parseDecisionStatement();
+        }
+
+        case TokenType::kw_todo: {
+            return parseTodoStatement();
+        }
+
+        case TokenType::kw_blocker: {
+            return parseBlockerStatement();
+        }
+
+        case TokenType::kw_risk: {
+            return parseRiskStatement();
+        }
+
+        case TokenType::kw_link: {
+            return parseLinkStatement();
+        }
+
+        default: throw ParseError("", current().line, current().column);
     }
 
     throw ParseError("Expected at least one statement within standup block.", current().line, current().column);
@@ -88,6 +128,36 @@ std::unique_ptr<TagStatementNode> Parser::parseTagStatement() {
     std::unique_ptr<TagStatementNode> tNode = std::make_unique<TagStatementNode>();
     tNode->value = tagToken.value.value_or("");
     return tNode;
+}
+
+std::unique_ptr<SectionStatementNode> Parser::parseSectionStatement() {
+    consume(
+        TokenType::kw_section,
+        "Expected 'section' keyword to begin section statement."
+    );
+
+    const Token& sectionToken = consume(
+        TokenType::lit_string,
+        "Expected string literal after 'section' keyword."
+    );
+
+    consume(
+        TokenType::left_curly_bracket,
+        "Exepcted '{' folowing section title."
+    );
+
+    std::unique_ptr<SectionStatementNode> sNode = std::make_unique<SectionStatementNode>();
+    sNode->title = sectionToken.value.value_or("");
+    while(!check(TokenType::right_curly_bracket) && !isAtEnd()) {
+        sNode->statements.push_back(parseStatement());
+    }
+
+    consume(
+        TokenType::right_curly_bracket,
+        "Expected '}' to close the section statement."
+    );
+
+    return sNode;
 }
 
 std::unique_ptr<AttendeeStatementNode> Parser::parseAttendeeStatement() {
@@ -137,7 +207,167 @@ std::unique_ptr<SummaryStatementNode> Parser::parseSummaryStatement() {
     return sNode;
 }
 
+std::unique_ptr<NoteStatementNode> Parser::parseNoteStatement() {
+    consume(
+        TokenType::kw_note,
+        ""
+    );
 
+    const Token& noteToken = consume(
+        TokenType::lit_string,
+        ""
+    );
+
+    std::unique_ptr<NoteStatementNode> nNode = std::make_unique<NoteStatementNode>();
+    nNode->value = noteToken.value.value_or("");
+
+    return nNode;
+}
+
+std::unique_ptr<DecisionStatementNode> Parser::parseDecisionStatement() {
+    consume(
+        TokenType::kw_decision,
+        ""
+    );
+
+    const Token& decisionToken = consume(
+        TokenType::lit_string,
+        ""
+    );
+
+    std::unique_ptr<DecisionStatementNode> dNode = std::make_unique<DecisionStatementNode>();
+    dNode->value = decisionToken.value.value_or("");
+
+    return dNode;
+}
+
+std::unique_ptr<TodoStatementNode> Parser::parseTodoStatement() {
+    consume(
+        TokenType::kw_todo,
+        ""
+    );
+
+    std::unique_ptr<TodoStatementNode> tNode = std::make_unique<TodoStatementNode>();
+    while (check(TokenType::identifier)) {
+        const Token& attendeeToken = consume(
+            TokenType::identifier,
+            ""
+        );
+        tNode->attendees.push_back(attendeeToken.value.value_or(""));
+    }
+
+    if (match(TokenType::kw_by)) {
+        const Token& dateToken = consume(
+            TokenType::lit_date,
+            ""
+        );
+        tNode->date = dateToken.value.value_or("");
+    }
+
+    if (match(TokenType::kw_priority)) {
+        if (match(TokenType::kw_priority_low)) {
+            tNode->priority = "low";
+        } else if (match(TokenType::kw_priority_medium)) {
+            tNode->priority = "medium";
+        } else if (match(TokenType::kw_priority_high)) {
+            tNode->priority = "high";   
+        } else {
+            throw ParseError(
+                "Expected priority level 'low', 'medium', or 'high' after the 'priority' keyword.", 
+                current().line, 
+                current().column
+            );
+        }
+    }
+
+    const Token& noteToken = consume(
+        TokenType::lit_string,
+        ""
+    );
+    tNode->note = noteToken.value.value_or("");
+
+    return tNode;
+}
+
+std::unique_ptr<BlockerStatementNode> Parser::parseBlockerStatement() {
+    consume(
+        TokenType::kw_blocker,
+        ""
+    );
+
+    std::unique_ptr<BlockerStatementNode> bNode = std::make_unique<BlockerStatementNode>();
+    while (check(TokenType::identifier)) {
+        const Token& attendeeToken = consume(
+            TokenType::identifier,
+            ""
+        );
+        bNode->attendees.push_back(attendeeToken.value.value_or(""));
+    }
+
+    const Token& noteToken = consume(
+        TokenType::lit_string,
+        ""
+    );
+    bNode->note = noteToken.value.value_or("");
+
+    return bNode;
+}
+
+std::unique_ptr<RiskStatementNode> Parser::parseRiskStatement() {
+    consume(
+        TokenType::kw_risk,
+        ""
+    );
+
+    std::unique_ptr<RiskStatementNode> rNode = std::make_unique<RiskStatementNode>();
+    if (match(TokenType::kw_priority)) {
+        if (match(TokenType::kw_priority_low)) {
+            rNode->priority = "low";
+        } else if (match(TokenType::kw_priority_medium)) {
+            rNode->priority = "medium";
+        } else if (match(TokenType::kw_priority_high)) {
+            rNode->priority = "high";   
+        } else {
+            throw ParseError(
+                "Expected priority level 'low', 'medium', or 'high' after the 'priority' keyword.", 
+                current().line, 
+                current().column
+            );
+        }
+    }
+
+    const Token& noteToken = consume(
+        TokenType::lit_string,
+        ""
+    );
+    rNode->note = noteToken.value.value_or("");
+
+    return rNode;
+}
+
+std::unique_ptr<LinkStatementNode> Parser::parseLinkStatement() {
+    consume(
+        TokenType::kw_link,
+        ""
+    );
+
+    std::unique_ptr<LinkStatementNode> lNode = std::make_unique<LinkStatementNode>();
+    const Token& linkToken = consume(
+        TokenType::lit_string,
+        ""
+    );
+    lNode->link = linkToken.value.value_or("");
+
+    if (check(TokenType::lit_string)) {
+        const Token& noteToken = consume(
+            TokenType::lit_string,
+            ""
+        );
+        lNode->note = noteToken.value.value_or("");
+    }
+    
+    return lNode;
+}
 
 const Token& Parser::current() {
     return tokens[position];
@@ -168,10 +398,6 @@ bool Parser::isAtEnd() {
 }
 
 bool Parser::check(TokenType tokenType) {
-    if (isAtEnd()) {
-        return false;
-    }
-
     return current().tokenType == tokenType;
 }
 

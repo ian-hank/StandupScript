@@ -5,6 +5,7 @@
 
 #include "lexer.h"
 #include "token_utils.h"
+#include "parser.h"
 
 const bool LEXER_DEBUG = true;
 
@@ -33,6 +34,15 @@ int main(int argc, char* argv[]) {
         }
     } catch(const std::exception& e) {
         std::cerr << "StandupScript Error (lexing): " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    Parser parser(std::move(tokens));
+    ProgramNode programNode;
+    try {
+        programNode = parser.parseProgram();
+    } catch(const std::exception& e) {
+        std::cerr << "StandupScript Error (parsing): " << e.what() << std::endl;
         return EXIT_FAILURE;
     }
 

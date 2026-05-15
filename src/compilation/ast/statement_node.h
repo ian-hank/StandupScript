@@ -59,5 +59,5 @@ struct RiskStatementNode : StatementNode {
 
 struct LinkStatementNode : StatementNode {
     std::string link;
-    std::string note;
+    std::optional<std::string> note;
 };

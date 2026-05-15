@@ -23,10 +23,10 @@ std::string TokenUtils::tokenTypeToString(const TokenType& type) {
         case TokenType::kw_by:                  return "kw_by";
         case TokenType::kw_date:                return "kw_date";
         case TokenType::kw_decision:            return "kw_decision";
-        case TokenType::kw_high:                return "kw_high";
+        case TokenType::kw_priority_high:       return "kw_priority_high";
         case TokenType::kw_link:                return "kw_link";
-        case TokenType::kw_low:                 return "kw_low";
-        case TokenType::kw_medium:              return "kw_medium";
+        case TokenType::kw_priority_low:        return "kw_priority_low";
+        case TokenType::kw_priority_medium:     return "kw_priority_medium";
         case TokenType::kw_meeting:             return "kw_meeting";
         case TokenType::kw_note:                return "kw_note";
         case TokenType::kw_priority:            return "kw_priority";
