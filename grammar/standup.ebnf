@@ -30,7 +30,7 @@ date_statement
     ;
 
 tag_statement
-    = kw_date,
+    = kw_tag,
       identifier
     ;
 
@@ -75,13 +75,15 @@ note_statement
 
 decision_statement
     = kw_decision,
-      string,
+      string
     ;
 
 todo_statement
     = kw_todo,
-      { attendees },
+      { attendee_ref },
       [ date_due_clause ],
+      [ priority_clause ],
+      string
     ;
 
 date_due_clause
@@ -89,14 +91,31 @@ date_due_clause
       date
     ;
 
+priority_clause
+    = kw_priority,
+      priority_level
+    ;
+
+priority_level
+    = kw_priority_low
+    | kw_priority_medium 
+    | kw_priority_high
+    ;
+
 blocker_statement
-    = 
+    = kw_blocker,
+      { attendee_ref },
+      string
     ;
 
 risk_statement
-    =
+    = kw_risk,
+      [ priority_clause ],
+      string
     ;
 
 link_statement
-    =
+    = kw_link,
+      string,
+      [ string ]
     ;
