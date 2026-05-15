@@ -3,18 +3,26 @@
 
 Parser::Parser(std::vector<Token> tokens) : tokens(std::move(tokens)) {}
 
+// ********* PROGRAM NODE ********* //
+
+/// @brief Parses a vector<Token> into an structured AST tree.
+/// @return Overarching ProgramNode node representing the entire tree.
 ProgramNode Parser::parseProgram() {
     ProgramNode pNode;
     pNode.standup = parseStandup();
 
     consume(
         TokenType::eof,
-        "Expected end of input after standup block."
+        "Expected end of input (EOF) after the standup block."
     );
 
     return pNode;
 }
 
+// ********* STANDUP NODE ********* //
+
+/// @brief Matches on current() TokenType to parse a StandupScript statement node.
+/// @return Smart pointer to the statement node.
 StandupNode Parser::parseStandup() {
     consume(
         TokenType::kw_standup, 
@@ -46,6 +54,10 @@ StandupNode Parser::parseStandup() {
     return sNode;
 }
 
+// ********* STATEMENT NODES ********* //
+
+/// @brief Matches on current() TokenType to parse a StandupScript statement node.
+/// @return Smart pointer to the statement node.
 std::unique_ptr<StatementNode> Parser::parseStatement() {
     switch (current().tokenType) {
         case TokenType::kw_date: {
@@ -92,10 +104,8 @@ std::unique_ptr<StatementNode> Parser::parseStatement() {
             return parseLinkStatement();
         }
 
-        default: throw ParseError("", current().line, current().column);
+        default: throw ParseError("Expected at least one statement within block.", current().line, current().column);
     }
-
-    throw ParseError("Expected at least one statement within standup block.", current().line, current().column);
 }
 
 std::unique_ptr<DateStatementNode> Parser::parseDateStatement() {
@@ -210,12 +220,12 @@ std::unique_ptr<SummaryStatementNode> Parser::parseSummaryStatement() {
 std::unique_ptr<NoteStatementNode> Parser::parseNoteStatement() {
     consume(
         TokenType::kw_note,
-        ""
+        "Expected 'note' keyword to begin note statement."
     );
 
     const Token& noteToken = consume(
         TokenType::lit_string,
-        ""
+        "Expected \"string literal\" after the 'note' keyword."
     );
 
     std::unique_ptr<NoteStatementNode> nNode = std::make_unique<NoteStatementNode>();
@@ -227,12 +237,12 @@ std::unique_ptr<NoteStatementNode> Parser::parseNoteStatement() {
 std::unique_ptr<DecisionStatementNode> Parser::parseDecisionStatement() {
     consume(
         TokenType::kw_decision,
-        ""
+        "Expected 'decision' keyword to begin decision statement."
     );
 
     const Token& decisionToken = consume(
         TokenType::lit_string,
-        ""
+        "Expected a \"string literal\" after the 'decision' keyword."
     );
 
     std::unique_ptr<DecisionStatementNode> dNode = std::make_unique<DecisionStatementNode>();
@@ -244,45 +254,33 @@ std::unique_ptr<DecisionStatementNode> Parser::parseDecisionStatement() {
 std::unique_ptr<TodoStatementNode> Parser::parseTodoStatement() {
     consume(
         TokenType::kw_todo,
-        ""
+        "Expected 'todo' keyword to begin todo statement."
     );
 
     std::unique_ptr<TodoStatementNode> tNode = std::make_unique<TodoStatementNode>();
     while (check(TokenType::identifier)) {
         const Token& attendeeToken = consume(
             TokenType::identifier,
-            ""
+            "Expected identifier for attendee (or alias)."
         );
         tNode->attendees.push_back(attendeeToken.value.value_or(""));
-    }
+    } // no attendee signals to make a todo applicable for all attendees
 
     if (match(TokenType::kw_by)) {
         const Token& dateToken = consume(
             TokenType::lit_date,
-            ""
+            "Expected a date literal after the 'by' keyword."
         );
         tNode->date = dateToken.value.value_or("");
     }
 
     if (match(TokenType::kw_priority)) {
-        if (match(TokenType::kw_priority_low)) {
-            tNode->priority = "low";
-        } else if (match(TokenType::kw_priority_medium)) {
-            tNode->priority = "medium";
-        } else if (match(TokenType::kw_priority_high)) {
-            tNode->priority = "high";   
-        } else {
-            throw ParseError(
-                "Expected priority level 'low', 'medium', or 'high' after the 'priority' keyword.", 
-                current().line, 
-                current().column
-            );
-        }
+        tNode->priority = parsePriority();
     }
 
     const Token& noteToken = consume(
         TokenType::lit_string,
-        ""
+        "Expected a \"string literal\" to end a note statement."
     );
     tNode->note = noteToken.value.value_or("");
 
@@ -292,21 +290,21 @@ std::unique_ptr<TodoStatementNode> Parser::parseTodoStatement() {
 std::unique_ptr<BlockerStatementNode> Parser::parseBlockerStatement() {
     consume(
         TokenType::kw_blocker,
-        ""
+        "Expected 'blocker' keyword to begin blocker statement."
     );
 
     std::unique_ptr<BlockerStatementNode> bNode = std::make_unique<BlockerStatementNode>();
     while (check(TokenType::identifier)) {
         const Token& attendeeToken = consume(
             TokenType::identifier,
-            ""
+            "Expected identifier for attendee (or alias)."
         );
         bNode->attendees.push_back(attendeeToken.value.value_or(""));
-    }
+    } // no attendee signals to make a blocker applicable for all attendees
 
     const Token& noteToken = consume(
         TokenType::lit_string,
-        ""
+        "Expected \"string literal\" to end a blocker statement."
     );
     bNode->note = noteToken.value.value_or("");
 
@@ -316,29 +314,17 @@ std::unique_ptr<BlockerStatementNode> Parser::parseBlockerStatement() {
 std::unique_ptr<RiskStatementNode> Parser::parseRiskStatement() {
     consume(
         TokenType::kw_risk,
-        ""
+        "Expected 'risk' keyword to begin risk statement."
     );
 
     std::unique_ptr<RiskStatementNode> rNode = std::make_unique<RiskStatementNode>();
     if (match(TokenType::kw_priority)) {
-        if (match(TokenType::kw_priority_low)) {
-            rNode->priority = "low";
-        } else if (match(TokenType::kw_priority_medium)) {
-            rNode->priority = "medium";
-        } else if (match(TokenType::kw_priority_high)) {
-            rNode->priority = "high";   
-        } else {
-            throw ParseError(
-                "Expected priority level 'low', 'medium', or 'high' after the 'priority' keyword.", 
-                current().line, 
-                current().column
-            );
-        }
+        rNode->priority = parsePriority();
     }
 
     const Token& noteToken = consume(
         TokenType::lit_string,
-        ""
+        "Expected \"string literal\" to end a risk statement."
     );
     rNode->note = noteToken.value.value_or("");
 
@@ -348,20 +334,20 @@ std::unique_ptr<RiskStatementNode> Parser::parseRiskStatement() {
 std::unique_ptr<LinkStatementNode> Parser::parseLinkStatement() {
     consume(
         TokenType::kw_link,
-        ""
+        "Expected 'link' keyword to begin link statement."
     );
 
     std::unique_ptr<LinkStatementNode> lNode = std::make_unique<LinkStatementNode>();
     const Token& linkToken = consume(
         TokenType::lit_string,
-        ""
+        "Expected a \"string literal\" after the 'link' keyword."
     );
     lNode->link = linkToken.value.value_or("");
 
     if (check(TokenType::lit_string)) {
         const Token& noteToken = consume(
             TokenType::lit_string,
-            ""
+            "Expected a \"string literal\" after link string literal."
         );
         lNode->note = noteToken.value.value_or("");
     }
@@ -369,12 +355,32 @@ std::unique_ptr<LinkStatementNode> Parser::parseLinkStatement() {
     return lNode;
 }
 
+// ********* PARSING HELPERS ********* //
+std::string Parser::parsePriority() {
+    if (match(TokenType::kw_priority_low)) {
+        return "low";
+    } else if (match(TokenType::kw_priority_medium)) {
+        return "medium";
+    } else if (match(TokenType::kw_priority_high)) {
+        return "high";   
+    } else {
+        throw ParseError(
+            "Expected priority level 'low', 'medium', or 'high' after the 'priority' keyword.", 
+            current().line, 
+            current().column
+        );
+    }
+}
+
+// ********* CURSOR MOVEMENT ********* //
 const Token& Parser::current() {
     return tokens[position];
 }
 
 const Token& Parser::previous() {
-    return tokens[position - 1];
+    return position == 0 
+        ? tokens.back()
+        : tokens[position - 1];
 }
 
 const Token& Parser::advance() {

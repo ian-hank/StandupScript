@@ -17,12 +17,7 @@ class Parser {
         bool check(TokenType);
         bool match(TokenType);
 
-    public:
-        explicit Parser(std::vector<Token> tokens);
-
-        ProgramNode parseProgram();
         StandupNode parseStandup();
-
         std::unique_ptr<StatementNode> parseStatement();
         std::unique_ptr<DateStatementNode> parseDateStatement();
         std::unique_ptr<TagStatementNode> parseTagStatement();
@@ -35,4 +30,10 @@ class Parser {
         std::unique_ptr<BlockerStatementNode> parseBlockerStatement();
         std::unique_ptr<RiskStatementNode> parseRiskStatement();
         std::unique_ptr<LinkStatementNode> parseLinkStatement();
+
+        std::string parsePriority();
+
+    public:
+        explicit Parser(std::vector<Token> tokens);
+        ProgramNode parseProgram();
 };

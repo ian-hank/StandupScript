@@ -41,7 +41,7 @@ struct DecisionStatementNode : StatementNode {
 
 struct TodoStatementNode : StatementNode {
     std::vector<std::string> attendees;
-    std::string date;
+    std::optional<std::string> date;
     std::optional<std::string> priority;
     std::string note;
 };
@@ -52,7 +52,6 @@ struct BlockerStatementNode : StatementNode {
 };
 
 struct RiskStatementNode : StatementNode {
-    std::string value;
     std::optional<std::string> priority;
     std::string note;
 };
