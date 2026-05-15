@@ -1,0 +1,25 @@
+standup "Initial Scrum" {
+  date 2026-04-28
+  tag software
+
+  attendee Ian Hall as ih
+  attendee Brian Weathers as bw
+  attendee Courtney Clang as cc
+
+  summary "Summary text."
+
+  section "Discussion" {
+    note "Discussed current work."
+    decision "Keep v1 focused."
+  }
+
+  section "Action Items" {
+    todo ih by 2026-05-01 priority high "Implement lexer"
+    todo bry by 2026-05-02 priority medium "Review Markdown output"
+    todo c by 2026-05-03 priority medium "Review Parser output"
+  }
+
+  blocker ih "Need final JSON schema."
+  risk priority low "Scope could creep."
+  link "https://example.com" "Reference"
+}
