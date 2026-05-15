@@ -4,6 +4,11 @@
 #include "program_node.h"
 
 class Parser {
+    public:
+        explicit Parser(std::vector<Token> tokens);
+        
+        ProgramNode parseProgram();
+        
     private:
         std::vector<Token> tokens;
         std::size_t position = 0;
@@ -32,8 +37,4 @@ class Parser {
         std::unique_ptr<LinkStatementNode> parseLinkStatement();
 
         std::string parsePriority();
-
-    public:
-        explicit Parser(std::vector<Token> tokens);
-        ProgramNode parseProgram();
 };

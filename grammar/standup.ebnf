@@ -1,0 +1,102 @@
+(* StandupScript grammar.
+
+   This file uses an ISO EBNF style:
+   - comma for sequence
+   - | for alternatives
+   - [ ... ] for optional syntax
+   - { ... } for 0 or more repetitions
+   - ; to terminate
+
+   kw = keyword
+   string = "some string"
+   identifier = xyz
+*)
+
+standup
+    = kw_standup,
+      string,
+      left_curly_bracket,
+      date_statement,
+      tag_statement,
+      attendee_statement, { attendee_statement },
+      [ summary_statement ],
+      standup_statement, { standup_statement },
+      right_curly_bracket
+    ;
+
+date_statement
+    = kw_date,
+      date
+    ;
+
+tag_statement
+    = kw_date,
+      identifier
+    ;
+
+attendee_statement
+    = kw_attendee,
+      identifier,
+      [ attendee_alias_clause ]
+    ;
+
+attendee_alias_clause
+    = kw_as,
+      identifier
+    ;
+
+summary_statement
+    = kw_summary,
+      string
+    ;
+
+standup_statement
+    = section_statement
+    | note_statement
+    | decision_statement
+    | todo_statement
+    | blocker_statement
+    | risk_statement
+    | link_statement
+    ;
+
+section_statement
+    = kw_section,
+      string,
+      left_curly_bracket,
+      standup_statement, { standup_statement },
+      right_curly_bracket
+    ;
+
+note_statement
+    = kw_note,
+      string
+    ;
+
+decision_statement
+    = kw_decision,
+      string,
+    ;
+
+todo_statement
+    = kw_todo,
+      { attendees },
+      [ date_due_clause ],
+    ;
+
+date_due_clause
+    = kw_by,
+      date
+    ;
+
+blocker_statement
+    = 
+    ;
+
+risk_statement
+    =
+    ;
+
+link_statement
+    =
+    ;

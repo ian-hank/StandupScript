@@ -4,9 +4,6 @@
 Parser::Parser(std::vector<Token> tokens) : tokens(std::move(tokens)) {}
 
 // ********* PROGRAM NODE ********* //
-
-/// @brief Parses a vector<Token> into an structured AST tree.
-/// @return Overarching ProgramNode node representing the entire tree.
 ProgramNode Parser::parseProgram() {
     ProgramNode pNode;
     pNode.standup = parseStandup();
@@ -20,9 +17,6 @@ ProgramNode Parser::parseProgram() {
 }
 
 // ********* STANDUP NODE ********* //
-
-/// @brief Matches on current() TokenType to parse a StandupScript statement node.
-/// @return Smart pointer to the statement node.
 StandupNode Parser::parseStandup() {
     consume(
         TokenType::kw_standup, 
@@ -55,9 +49,6 @@ StandupNode Parser::parseStandup() {
 }
 
 // ********* STATEMENT NODES ********* //
-
-/// @brief Matches on current() TokenType to parse a StandupScript statement node.
-/// @return Smart pointer to the statement node.
 std::unique_ptr<StatementNode> Parser::parseStatement() {
     switch (current().tokenType) {
         case TokenType::kw_date: {

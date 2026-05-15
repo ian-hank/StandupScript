@@ -6,6 +6,11 @@
     #include "tokens.h"
 
     class Lexer {
+        public:
+            Lexer(const std::string& input) : input(input) {}
+            
+            std::vector<Token> tokenize();
+
         private:
             std::string input;
             int position = 0;
@@ -15,7 +20,7 @@
 
             char peek();
             char spy();
-            bool withinBounds(int = 0); // may just want a withinSpyBounds();
+            bool withinBounds(int = 0);
 
             bool isNewLine();
             bool isWhiteSpace();
@@ -30,8 +35,4 @@
             Token readStringLiteral();
             Token readDateLiteral();
             Token readSeparator();
-            
-        public:
-            Lexer(const std::string& input) : input(input) {}
-            std::vector<Token> tokenize();
     };

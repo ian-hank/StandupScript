@@ -7,7 +7,7 @@
 
 const bool LEXER_DEBUG = true;
 
-// primary tokenizer
+// ********* TOKENIZER ********* //
 std::vector<Token> Lexer::tokenize() {    
     while (withinBounds()) {
         if (isNewLine()) {
@@ -43,7 +43,7 @@ std::vector<Token> Lexer::tokenize() {
     return tokens;
 }
 
-// utilities 
+// ********* UTILITIES ********* //
 char Lexer::peek() {
     return withinBounds() ? input[position] : '\0';
 }
@@ -112,7 +112,7 @@ bool Lexer::isSeparator(char current) {
     return LexerConstants::separators.count(current);
 }
 
-// readers 
+// ********* READERS ********* //
 Token Lexer::readIdentifierOrKeyword() {
     Token token;
     std::string buffer;

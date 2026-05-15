@@ -1,0 +1,17 @@
+(* StandupScript grammar.
+
+   This file uses an ISO EBNF style:
+   - comma for sequence
+   - | for alternatives
+   - [ ... ] for optional syntax
+   - { ... } for 0 or more repetitions
+   - ; to terminate
+
+   kw = keyword
+   string = "some string"
+   identifier = xyz
+*)
+
+program
+    = standup, EOF
+    ;
