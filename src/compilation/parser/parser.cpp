@@ -28,7 +28,7 @@ StandupNode Parser::parseStandup() {
 
     consume(
         TokenType::left_curly_bracket,
-        "Exepcted '{' folowing standup title."
+        "Expected '{' folowing standup title."
     );
 
     StandupNode sNode;
@@ -143,7 +143,7 @@ std::unique_ptr<SectionStatementNode> Parser::parseSectionStatement() {
 
     consume(
         TokenType::left_curly_bracket,
-        "Exepcted '{' folowing section title."
+        "Expected '{' folowing section title."
     );
 
     std::unique_ptr<SectionStatementNode> sNode = std::make_unique<SectionStatementNode>();
