@@ -35,6 +35,16 @@ StandupNode Parser::parseStandup() {
 
     StandupNode sNode;
     sNode.title = titleToken.value.value_or("");
+    sNode.statements.push_back(parseDateStatement());
+    sNode.statements.push_back(parseTagStatement());
+    parseAttendeeStatement();
+    while (check(TokenType::kw_attendee)) {
+        parseAttendeeStatement();
+    }
+
+    if (check(TokenType::kw_summary)) {
+        parseSummaryStatement();
+    }
 
     while (!check(TokenType::right_curly_bracket) && !isAtEnd()) {
         sNode.statements.push_back(parseStatement());
@@ -51,24 +61,8 @@ StandupNode Parser::parseStandup() {
 // ********* STATEMENT NODES ********* //
 std::unique_ptr<StatementNode> Parser::parseStatement() {
     switch (current().tokenType) {
-        case TokenType::kw_date: {
-            return parseDateStatement();
-        }
-
-        case TokenType::kw_tag: {
-            return parseTagStatement();
-        }
-
         case TokenType::kw_section: {
             return parseSectionStatement();
-        }
-
-        case TokenType::kw_attendee: {
-            return parseAttendeeStatement();
-        }
-
-        case TokenType::kw_summary: {
-            return parseSummaryStatement();
         }
 
         case TokenType::kw_note: {
