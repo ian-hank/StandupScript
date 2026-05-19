@@ -1,38 +1,38 @@
-    #pragma once
+#pragma once
 
-    #include <string>
-    #include <vector>
+#include <string>
+#include <vector>
 
-    #include "tokens.h"
+#include "tokens.h"
 
-    class Lexer {
-        public:
-            Lexer(const std::string& input) : input(input) {}
-            
-            std::vector<Token> tokenize();
+class Lexer {
+    public:
+        explicit Lexer(const std::string& input) : input(input) {}
+        
+        std::vector<Token> tokenize();
 
-        private:
-            std::string input;
-            int position = 0;
-            int line = 1;
-            int column = 1;
-            std::vector<Token> tokens;
+    private:
+        std::string input;
+        int position = 0;
+        int line = 1;
+        int column = 1;
+        std::vector<Token> tokens;
 
-            char peek();
-            char spy();
-            bool withinBounds(int = 0);
+        char peek();
+        char spy();
+        bool withinBounds(int = 0);
 
-            bool isNewLine();
-            bool isWhiteSpace();
-            bool isDateLiteral(char);
-            bool isStringDelimiter(char);
-            bool isSeparator(char);
+        bool isNewLine();
+        bool isWhiteSpace();
+        bool isDateLiteral(char);
+        bool isStringDelimiter(char);
+        bool isSeparator(char);
 
-            void hop(int = 1);
-            void advanceLine();
-            
-            Token readIdentifierOrKeyword();
-            Token readStringLiteral();
-            Token readDateLiteral();
-            Token readSeparator();
-    };
+        void hop(int = 1);
+        void advanceLine();
+        
+        Token readIdentifierOrKeyword();
+        Token readStringLiteral();
+        Token readDateLiteral();
+        Token readSeparator();
+};

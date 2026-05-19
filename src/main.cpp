@@ -6,6 +6,7 @@
 #include "lexer.h"
 #include "token_utils.h"
 #include "parser.h"
+#include "semantic_analyzer.h"
 
 const bool LEXER_DEBUG = true;
 
@@ -46,5 +47,13 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
+    SemanticAnalyzer semanticAnalyzer(programNode);
+    try {
+        semanticAnalyzer.analyzeProgram();
+    } catch(const std::exception& e) {
+        std::cerr << "StandupScript Error (semantics): " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+    
     return EXIT_SUCCESS;
 }

@@ -2,9 +2,9 @@ standup "Initial Scrum" {
   date 2026-04-28
   tag software
 
-  attendee Ian Hall as ih
-  attendee Brian Weathers as bw
-  attendee Courtney Clang as cc
+  attendee Ian as ih
+  attendee Brian as bw
+  attendee Courtney as cc
 
   summary "Summary text."
 
