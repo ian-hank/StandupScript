@@ -59,7 +59,7 @@ void TokenUtils::printTokens(const std::vector<Token>& tokens) {
         const Token& token = tokens[i];
         
         std::ostringstream tokenLocation;
-        tokenLocation << token.location.line << ':' << token.location.column;
+        tokenLocation << token.location.start.line << ':' << token.location.start.column;
 
         std::cout
             << '[' << std::setw(3) << std::setfill('0') << i + 1 << "] "

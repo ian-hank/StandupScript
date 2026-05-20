@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "tokens.h"
+#include "source_location.h"
 
 class Lexer {
     public:
@@ -21,6 +22,7 @@ class Lexer {
         char peek();
         char spy();
         bool withinBounds(int = 0);
+        SourceLocation currentLocation();
 
         bool isNewLine();
         bool isWhiteSpace();
@@ -31,6 +33,11 @@ class Lexer {
         void hop(int = 1);
         void advanceLine();
         
+        Token startToken();
+        Token startToken(TokenType);
+        void  finishToken(Token&);
+        Token completeToken(TokenType);
+    
         Token readIdentifierOrKeyword();
         Token readStringLiteral();
         Token readDateLiteral();

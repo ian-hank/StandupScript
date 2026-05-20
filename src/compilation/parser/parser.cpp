@@ -89,7 +89,7 @@ std::unique_ptr<StatementNode> Parser::parseStatement() {
             return parseLinkStatement();
         }
 
-        default: throw ParseError("Expected at least one statement within block.", current().location.line, current().location.column);
+        default: throw ParseError("Expected at least one statement within block.", current().location.start.line, current().location.start.column);
     }
 }
 
@@ -351,8 +351,8 @@ std::string Parser::parsePriority() {
     } else {
         throw ParseError(
             "Expected priority level 'low', 'medium', or 'high' after the 'priority' keyword.", 
-            current().location.line, 
-            current().location.column
+            current().location.start.line, 
+            current().location.start.column
         );
     }
 }
@@ -381,7 +381,7 @@ const Token& Parser::consume(TokenType tokenType, const std::string& message) {
         return advance();
     }
 
-    throw ParseError(message, current().location.line, current().location.column);
+    throw ParseError(message, current().location.start.line, current().location.start.column);
 }
 
 bool Parser::isAtEnd() {

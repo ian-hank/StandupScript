@@ -7,7 +7,6 @@
 
 const bool LEXER_DEBUG = true;
 
-// ********* TOKENIZER ********* //
 std::vector<Token> Lexer::tokenize() {    
     while (withinBounds()) {
         if (isNewLine()) {
@@ -34,27 +33,34 @@ std::vector<Token> Lexer::tokenize() {
         }
     }
 
-    Token token;
-    token.tokenType = TokenType::eof;
-    token.location.line = line;
-    token.location.column = column;
+    Token token = completeToken(TokenType::eof);
     tokens.push_back(token);
 
     return tokens;
 }
 
-// ********* UTILITIES ********* //
 char Lexer::peek() {
-    return withinBounds() ? input[position] : '\0';
+    return withinBounds() 
+        ? input[position] 
+        : '\0';
 }
 
 char Lexer::spy() {
-    return withinBounds(1) ? input[position + 1] : '\0';
+    return withinBounds(1) 
+        ? input[position + 1] 
+        : '\0';
+}
+
+SourceLocation Lexer::currentLocation() {
+    return {
+        .line = line,
+        .column = column
+    };
 }
 
 void Lexer::hop(int amount) {
-        position += amount;
-        column += amount;
+    position += amount;
+    column += amount;
 }
 
 void Lexer::advanceLine() {
@@ -62,6 +68,7 @@ void Lexer::advanceLine() {
         position += 2;
         line++;
         column = 1;
+
         return;
     }
 
@@ -112,13 +119,36 @@ bool Lexer::isSeparator(char current) {
     return LexerConstants::separators.count(current);
 }
 
-// ********* READERS ********* //
-Token Lexer::readIdentifierOrKeyword() {
+Token Lexer::startToken() {
     Token token;
+    token.location.start = currentLocation();
+
+    return token;
+}
+
+Token Lexer::startToken(TokenType tokenType) {
+    Token token = startToken();
+    token.tokenType = tokenType;
+
+    return token;
+}
+
+void Lexer::finishToken(Token& token) {
+    token.location.end = currentLocation();
+}
+
+Token Lexer::completeToken(TokenType tokenType) {
+    Token token = startToken();
+    token.tokenType = tokenType;
+    finishToken(token);
+
+    return token;
+}
+
+
+Token Lexer::readIdentifierOrKeyword() {
+    Token token = startToken();
     std::string buffer;
-    
-    token.location.line = line;
-    token.location.column = column;
     while (withinBounds() && std::isalnum(peek())) {
         buffer.push_back(peek());
         hop();
@@ -126,20 +156,20 @@ Token Lexer::readIdentifierOrKeyword() {
 
     if (LexerConstants::keywords.count(buffer)) {
         token.tokenType = LexerConstants::keywords.at(buffer);
+        finishToken(token);
+
         return token;
     }
 
-    token.tokenType = TokenType::identifier;
     token.value = buffer;
+    token.tokenType = TokenType::identifier;
+    finishToken(token);
+
     return token;
 }
 
 Token Lexer::readStringLiteral() {
-    Token token;
-    std::string buffer;
-
-    token.location.line = line;
-    token.location.column = column;
+    Token token = startToken(TokenType::lit_string);
     hop();
     
     if (input.find('\"', position) == std::string::npos) {
@@ -150,36 +180,33 @@ Token Lexer::readStringLiteral() {
         exit(EXIT_FAILURE);
     }
 
+    std::string buffer;
     while (peek() != '\"') {
         buffer.push_back(peek());
         hop();
     }
 
-    hop();
-    token.tokenType = TokenType::lit_string;
     token.value = buffer;
+    hop();
+    finishToken(token);
 
     return token;
 }
 
 Token Lexer::readDateLiteral() {
-    Token token;
-
-    token.location.line = line;
-    token.location.column = column;
-    token.tokenType = TokenType::lit_date;
+    Token token = startToken(TokenType::lit_date);
     token.value = input.substr(position, 10);
-
     hop(10);
+    finishToken(token);
+
     return token;
 }
 
 Token Lexer::readSeparator() {
-    Token token;
-    token.location.line = line;
-    token.location.column = column;
+    Token token = startToken();
     token.tokenType = LexerConstants::separators.at(peek());
-
     hop();
+    finishToken(token);
+
     return token;
 }

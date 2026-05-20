@@ -53,5 +53,5 @@ enum class TokenType {
 struct Token {
     TokenType tokenType;
     std::optional<std::string> value;
-    SourceLocation location;
+    SourceSpan location;
 };

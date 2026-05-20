@@ -9,5 +9,5 @@
 struct StandupNode {
     std::string title;
     std::vector<std::unique_ptr<StatementNode>> statements;
-    SourceLocation location;
+    SourceSpan location;
 };

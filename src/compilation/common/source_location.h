@@ -5,4 +5,7 @@ struct SourceLocation {
     int column;
 };
 
-// add spans eventually
+struct SourceSpan {
+    SourceLocation start;
+    SourceLocation end;
+};
