@@ -7,6 +7,7 @@
 #include "token_utils.h"
 #include "parser.h"
 #include "semantic_analyzer.h"
+#include "lexer_error.h"
 
 const bool LEXER_DEBUG = true;
 
@@ -25,7 +26,6 @@ int main(int argc, char* argv[]) {
     std::stringstream contents_stream;
     contents_stream << input_file.rdbuf();
     std::string contents = contents_stream.str();
-
     Lexer lexer(std::move(contents));
     std::vector<Token> tokens;
     try {
@@ -48,12 +48,16 @@ int main(int argc, char* argv[]) {
     }
 
     SemanticAnalyzer semanticAnalyzer(programNode);
-    try {
-        semanticAnalyzer.analyzeProgram();
-    } catch(const std::exception& e) {
-        std::cerr << "StandupScript Error (semantics): " << e.what() << std::endl;
+    if (!semanticAnalyzer.analyzeProgram()) {
+        std::vector<SemanticError> errors = semanticAnalyzer.getErrors();
+        for (auto& error : errors) {
+            std::cerr 
+                << "StandupScript Error (semantics): " 
+                << error.message << " at " << error.line << ":" << error.column << std::endl;
+        }
+
         return EXIT_FAILURE;
     }
-    
+
     return EXIT_SUCCESS;
 }

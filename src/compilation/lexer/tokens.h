@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#include <source_location.h>
+
 
 enum class TokenType {
     // Identifiers
@@ -51,6 +53,5 @@ enum class TokenType {
 struct Token {
     TokenType tokenType;
     std::optional<std::string> value;
-    int line;
-    int column;
+    SourceLocation location;
 };

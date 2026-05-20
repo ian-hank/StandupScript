@@ -34,11 +34,11 @@ std::vector<Token> Lexer::tokenize() {
         }
     }
 
-    tokens.push_back({
-        .tokenType = TokenType::eof, 
-        .line = line,
-        .column = column,
-    });
+    Token token;
+    token.tokenType = TokenType::eof;
+    token.location.line = line;
+    token.location.column = column;
+    tokens.push_back(token);
 
     return tokens;
 }
@@ -100,7 +100,7 @@ bool Lexer::isDateLiteral(char current) {
     if (!std::regex_match(date, datePattern)) {
         return false;
     }
-    
+
     return true;
 }
 
@@ -116,9 +116,9 @@ bool Lexer::isSeparator(char current) {
 Token Lexer::readIdentifierOrKeyword() {
     Token token;
     std::string buffer;
-
-    token.line = line;
-    token.column = column;
+    
+    token.location.line = line;
+    token.location.column = column;
     while (withinBounds() && std::isalnum(peek())) {
         buffer.push_back(peek());
         hop();
@@ -138,8 +138,8 @@ Token Lexer::readStringLiteral() {
     Token token;
     std::string buffer;
 
-    token.line = line;
-    token.column = column;
+    token.location.line = line;
+    token.location.column = column;
     hop();
     
     if (input.find('\"', position) == std::string::npos) {
@@ -165,8 +165,8 @@ Token Lexer::readStringLiteral() {
 Token Lexer::readDateLiteral() {
     Token token;
 
-    token.line = line;
-    token.column = column;
+    token.location.line = line;
+    token.location.column = column;
     token.tokenType = TokenType::lit_date;
     token.value = input.substr(position, 10);
 
@@ -176,8 +176,8 @@ Token Lexer::readDateLiteral() {
 
 Token Lexer::readSeparator() {
     Token token;
-    token.line = line;
-    token.column = column;
+    token.location.line = line;
+    token.location.column = column;
     token.tokenType = LexerConstants::separators.at(peek());
 
     hop();

@@ -18,6 +18,7 @@ ProgramNode Parser::parseProgram() {
 
 // ********* STANDUP NODE ********* //
 StandupNode Parser::parseStandup() {
+    StandupNode sNode;
     consume(
         TokenType::kw_standup, 
         "Expected 'standup' keyword to begin file."
@@ -33,17 +34,16 @@ StandupNode Parser::parseStandup() {
         "Expected '{' folowing standup title."
     );
 
-    StandupNode sNode;
     sNode.title = titleToken.value.value_or("");
     sNode.statements.push_back(parseDateStatement());
     sNode.statements.push_back(parseTagStatement());
-    parseAttendeeStatement();
+    sNode.statements.push_back(parseAttendeeStatement());
     while (check(TokenType::kw_attendee)) {
-        parseAttendeeStatement();
+        sNode.statements.push_back(parseAttendeeStatement());
     }
 
     if (check(TokenType::kw_summary)) {
-        parseSummaryStatement();
+        sNode.statements.push_back(parseSummaryStatement());
     }
 
     while (!check(TokenType::right_curly_bracket) && !isAtEnd()) {
@@ -89,7 +89,7 @@ std::unique_ptr<StatementNode> Parser::parseStatement() {
             return parseLinkStatement();
         }
 
-        default: throw ParseError("Expected at least one statement within block.", current().line, current().column);
+        default: throw ParseError("Expected at least one statement within block.", current().location.line, current().location.column);
     }
 }
 
@@ -166,7 +166,7 @@ std::unique_ptr<AttendeeStatementNode> Parser::parseAttendeeStatement() {
         "Expected identifer after 'attendee' keyword (the name of the attendee)"
     );
     std::unique_ptr<AttendeeStatementNode> aNode = std::make_unique<AttendeeStatementNode>();
-    aNode->name = attendeeToken.value.value_or("");
+    aNode->attendee = attendeeToken.value.value_or("");
 
     if (!check(TokenType::kw_as)) {
         return aNode;
@@ -351,8 +351,8 @@ std::string Parser::parsePriority() {
     } else {
         throw ParseError(
             "Expected priority level 'low', 'medium', or 'high' after the 'priority' keyword.", 
-            current().line, 
-            current().column
+            current().location.line, 
+            current().location.column
         );
     }
 }
@@ -381,7 +381,7 @@ const Token& Parser::consume(TokenType tokenType, const std::string& message) {
         return advance();
     }
 
-    throw ParseError(message, current().line, current().column);
+    throw ParseError(message, current().location.line, current().location.column);
 }
 
 bool Parser::isAtEnd() {

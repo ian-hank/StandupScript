@@ -57,11 +57,11 @@ void TokenUtils::printTokens(const std::vector<Token>& tokens) {
     std::cout << "================ TOKENS =================\n";
     for (int i = 0; i < static_cast<int>(tokens.size()); i++) {
         const Token& token = tokens[i];
-
+        
         std::ostringstream tokenLocation;
-        tokenLocation << token.line << ':' << token.column;
+        tokenLocation << token.location.line << ':' << token.location.column;
 
-        std::cout 
+        std::cout
             << '[' << std::setw(3) << std::setfill('0') << i + 1 << "] "
             << std::right << std::setfill(' ')
             << std::setw(19) << tokenTypeToString(token.tokenType)
