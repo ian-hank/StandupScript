@@ -17,7 +17,7 @@ standup
       string,
       left_curly_bracket,
       date_statement,
-      tag_statement,
+      tag_statement, { tag_statement },
       attendee_statement, { attendee_statement },
       [ summary_statement ],
       standup_statement, { standup_statement },

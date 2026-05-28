@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "source_location.h"
+
 enum class SemanticErrorCode {
     InvalidDate,
 };
@@ -9,6 +11,5 @@ enum class SemanticErrorCode {
 struct SemanticError {
     SemanticErrorCode semanticCode;
     std::string message;
-    int line;
-    int column;
+    SourceSpan location;
 };

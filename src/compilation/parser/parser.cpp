@@ -3,7 +3,6 @@
 
 Parser::Parser(std::vector<Token> tokens) : tokens(std::move(tokens)) {}
 
-// ********* PROGRAM NODE ********* //
 ProgramNode Parser::parseProgram() {
     ProgramNode pNode;
     pNode.standup = parseStandup();
@@ -16,10 +15,9 @@ ProgramNode Parser::parseProgram() {
     return pNode;
 }
 
-// ********* STANDUP NODE ********* //
-StandupNode Parser::parseStandup() {
-    StandupNode sNode;
-    consume(
+std::unique_ptr<StandupNode> Parser::parseStandup() {
+    std::unique_ptr<StandupNode> sNode = std::make_unique<StandupNode>();
+    const Token& startToken = consume(
         TokenType::kw_standup, 
         "Expected 'standup' keyword to begin file."
     );
@@ -34,31 +32,39 @@ StandupNode Parser::parseStandup() {
         "Expected '{' folowing standup title."
     );
 
-    sNode.title = titleToken.value.value_or("");
-    sNode.statements.push_back(parseDateStatement());
-    sNode.statements.push_back(parseTagStatement());
-    sNode.statements.push_back(parseAttendeeStatement());
+    sNode->title = titleToken.value.value_or("");
+    sNode->statements.push_back(parseDateStatement());
+
+    while (check(TokenType::kw_tag)) {
+        sNode->statements.push_back(parseTagStatement());
+    }
+
+    sNode->statements.push_back(parseAttendeeStatement());
     while (check(TokenType::kw_attendee)) {
-        sNode.statements.push_back(parseAttendeeStatement());
+        sNode->statements.push_back(parseAttendeeStatement());
     }
 
     if (check(TokenType::kw_summary)) {
-        sNode.statements.push_back(parseSummaryStatement());
+        sNode->statements.push_back(parseSummaryStatement());
     }
 
     while (!check(TokenType::right_curly_bracket) && !isAtEnd()) {
-        sNode.statements.push_back(parseStatement());
+        sNode->statements.push_back(parseStatement());
     }
 
-    consume(
+    const Token& endToken = consume(
         TokenType::right_curly_bracket,
         "Expected '}' to end standup block."
     );
 
+    sNode->location.start.line = startToken.location.start.line;
+    sNode->location.start.column = startToken.location.start.column;
+    sNode->location.end.line = endToken.location.end.line;
+    sNode->location.end.column = endToken.location.end.column;
+
     return sNode;
 }
 
-// ********* STATEMENT NODES ********* //
 std::unique_ptr<StatementNode> Parser::parseStatement() {
     switch (current().tokenType) {
         case TokenType::kw_section: {
@@ -94,7 +100,7 @@ std::unique_ptr<StatementNode> Parser::parseStatement() {
 }
 
 std::unique_ptr<DateStatementNode> Parser::parseDateStatement() {
-    consume(
+    const Token& startToken = consume(
         TokenType::kw_date,
         "Expected 'date' keyword to begin date statement."
     );
@@ -106,11 +112,13 @@ std::unique_ptr<DateStatementNode> Parser::parseDateStatement() {
 
     std::unique_ptr<DateStatementNode> dNode = std::make_unique<DateStatementNode>();
     dNode->value = dateToken.value.value_or("");
+    setNodeSource(startToken, dateToken, *dNode);
+
     return dNode;
 }
 
 std::unique_ptr<TagStatementNode> Parser::parseTagStatement() {
-    consume(
+    const Token& startToken = consume(
         TokenType::kw_tag,
         "Expected 'tag' keyword to being tag statement."
     );
@@ -122,11 +130,13 @@ std::unique_ptr<TagStatementNode> Parser::parseTagStatement() {
 
     std::unique_ptr<TagStatementNode> tNode = std::make_unique<TagStatementNode>();
     tNode->value = tagToken.value.value_or("");
+    setNodeSource(startToken, tagToken, *tNode);
+
     return tNode;
 }
 
 std::unique_ptr<SectionStatementNode> Parser::parseSectionStatement() {
-    consume(
+    const Token& startToken = consume(
         TokenType::kw_section,
         "Expected 'section' keyword to begin section statement."
     );
@@ -147,16 +157,18 @@ std::unique_ptr<SectionStatementNode> Parser::parseSectionStatement() {
         sNode->statements.push_back(parseStatement());
     }
 
-    consume(
+    const Token& endToken = consume(
         TokenType::right_curly_bracket,
         "Expected '}' to close the section statement."
     );
+
+    setNodeSource(startToken, endToken, *sNode);
 
     return sNode;
 }
 
 std::unique_ptr<AttendeeStatementNode> Parser::parseAttendeeStatement() {
-    consume(
+    const Token& startToken = consume(
         TokenType::kw_attendee,
         "Expected 'attendee' keyword to begin attendee statment."
     );
@@ -169,6 +181,7 @@ std::unique_ptr<AttendeeStatementNode> Parser::parseAttendeeStatement() {
     aNode->attendee = attendeeToken.value.value_or("");
 
     if (!check(TokenType::kw_as)) {
+        setNodeSource(startToken, attendeeToken, *aNode);
         return aNode;
     }
 
@@ -182,12 +195,13 @@ std::unique_ptr<AttendeeStatementNode> Parser::parseAttendeeStatement() {
         "Expected identifier after 'as' keyword (alias name)."
     );
     aNode->alias = aliasToken.value.value_or("");
+    setNodeSource(startToken, aliasToken, *aNode);
 
     return aNode;
 }
 
 std::unique_ptr<SummaryStatementNode> Parser::parseSummaryStatement() {
-    consume(
+    const Token& startToken = consume(
         TokenType::kw_summary,
         "Expected 'summary' keyword to begin summary statment."
     );
@@ -199,11 +213,13 @@ std::unique_ptr<SummaryStatementNode> Parser::parseSummaryStatement() {
 
     std::unique_ptr<SummaryStatementNode> sNode = std::make_unique<SummaryStatementNode>();
     sNode->value = summaryToken.value.value_or("");
+    setNodeSource(startToken, summaryToken, *sNode);
+
     return sNode;
 }
 
 std::unique_ptr<NoteStatementNode> Parser::parseNoteStatement() {
-    consume(
+    const Token& startToken = consume(
         TokenType::kw_note,
         "Expected 'note' keyword to begin note statement."
     );
@@ -215,12 +231,13 @@ std::unique_ptr<NoteStatementNode> Parser::parseNoteStatement() {
 
     std::unique_ptr<NoteStatementNode> nNode = std::make_unique<NoteStatementNode>();
     nNode->value = noteToken.value.value_or("");
+    setNodeSource(startToken, noteToken, *nNode);
 
     return nNode;
 }
 
 std::unique_ptr<DecisionStatementNode> Parser::parseDecisionStatement() {
-    consume(
+    const Token& startToken = consume(
         TokenType::kw_decision,
         "Expected 'decision' keyword to begin decision statement."
     );
@@ -232,12 +249,13 @@ std::unique_ptr<DecisionStatementNode> Parser::parseDecisionStatement() {
 
     std::unique_ptr<DecisionStatementNode> dNode = std::make_unique<DecisionStatementNode>();
     dNode->value = decisionToken.value.value_or("");
+    setNodeSource(startToken, decisionToken, *dNode);
 
     return dNode;
 }
 
 std::unique_ptr<TodoStatementNode> Parser::parseTodoStatement() {
-    consume(
+    const Token& startToken = consume(
         TokenType::kw_todo,
         "Expected 'todo' keyword to begin todo statement."
     );
@@ -268,12 +286,13 @@ std::unique_ptr<TodoStatementNode> Parser::parseTodoStatement() {
         "Expected a \"string literal\" to end a note statement."
     );
     tNode->note = noteToken.value.value_or("");
+    setNodeSource(startToken, noteToken, *tNode);
 
     return tNode;
 }
 
 std::unique_ptr<BlockerStatementNode> Parser::parseBlockerStatement() {
-    consume(
+    const Token& startToken = consume(
         TokenType::kw_blocker,
         "Expected 'blocker' keyword to begin blocker statement."
     );
@@ -292,12 +311,13 @@ std::unique_ptr<BlockerStatementNode> Parser::parseBlockerStatement() {
         "Expected \"string literal\" to end a blocker statement."
     );
     bNode->note = noteToken.value.value_or("");
+    setNodeSource(startToken, noteToken, *bNode);
 
     return bNode;
 }
 
 std::unique_ptr<RiskStatementNode> Parser::parseRiskStatement() {
-    consume(
+    const Token& startToken = consume(
         TokenType::kw_risk,
         "Expected 'risk' keyword to begin risk statement."
     );
@@ -312,12 +332,13 @@ std::unique_ptr<RiskStatementNode> Parser::parseRiskStatement() {
         "Expected \"string literal\" to end a risk statement."
     );
     rNode->note = noteToken.value.value_or("");
+    setNodeSource(startToken, noteToken, *rNode);
 
     return rNode;
 }
 
 std::unique_ptr<LinkStatementNode> Parser::parseLinkStatement() {
-    consume(
+    const Token& startToken = consume(
         TokenType::kw_link,
         "Expected 'link' keyword to begin link statement."
     );
@@ -328,6 +349,7 @@ std::unique_ptr<LinkStatementNode> Parser::parseLinkStatement() {
         "Expected a \"string literal\" after the 'link' keyword."
     );
     lNode->link = linkToken.value.value_or("");
+    setNodeSource(startToken, linkToken, *lNode);
 
     if (check(TokenType::lit_string)) {
         const Token& noteToken = consume(
@@ -335,12 +357,14 @@ std::unique_ptr<LinkStatementNode> Parser::parseLinkStatement() {
             "Expected a \"string literal\" after link string literal."
         );
         lNode->note = noteToken.value.value_or("");
+        setNodeSource(startToken, noteToken, *lNode);
+
+        return lNode;
     }
-    
+
     return lNode;
 }
 
-// ********* PARSING HELPERS ********* //
 std::string Parser::parsePriority() {
     if (match(TokenType::kw_priority_low)) {
         return "low";
@@ -357,7 +381,13 @@ std::string Parser::parsePriority() {
     }
 }
 
-// ********* CURSOR MOVEMENT ********* //
+void Parser::setNodeSource(const Token& startToken, const Token& endToken, StatementNode& node) {
+    node.location.start.line = startToken.location.start.line;
+    node.location.start.column = startToken.location.start.column;
+    node.location.end.line = endToken.location.end.line;
+    node.location.end.column = endToken.location.end.column;
+}
+
 const Token& Parser::current() {
     return tokens[position];
 }

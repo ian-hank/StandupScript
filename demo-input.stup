@@ -1,10 +1,14 @@
 standup "Initial Scrum" {
   date 1984-04-28
   tag software
+  tag internal
+  tag software
 
   attendee Ian as ih
   attendee Brian as bw
   attendee Courtney as cc
+  attendee Ivan as ih
+  attendee Ian as ich
 
   summary "Summary text."
 

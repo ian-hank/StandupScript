@@ -18,11 +18,13 @@ class Parser {
         const Token& advance();
         const Token& consume(TokenType, const std::string&);
 
+        void setNodeSource(const Token&, const Token&, StatementNode&);
+
         bool isAtEnd();
         bool check(TokenType);
         bool match(TokenType);
 
-        StandupNode parseStandup();
+        std::unique_ptr<StandupNode> parseStandup();
         std::unique_ptr<StatementNode> parseStatement();
         std::unique_ptr<DateStatementNode> parseDateStatement();
         std::unique_ptr<TagStatementNode> parseTagStatement();

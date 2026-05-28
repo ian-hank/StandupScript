@@ -9,7 +9,7 @@
 #include "semantic_analyzer.h"
 #include "lexer_error.h"
 
-const bool LEXER_DEBUG = true;
+const bool LEXER_DEBUG = false;
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
         for (auto& error : errors) {
             std::cerr 
                 << "StandupScript Error (semantics): " 
-                << error.message << " at " << error.line << ":" << error.column << std::endl;
+                << error.message << " at " << error.location.start.line << ":" << error.location.start.column << std::endl;
         }
 
         return EXIT_FAILURE;

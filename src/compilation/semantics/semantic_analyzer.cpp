@@ -2,14 +2,24 @@
 
 #include "semantic_analyzer.h"
 
-bool SemanticAnalyzer::analyzeProgram() {
-    analyzeStandup(program.standup);
-
-    return errors.empty();
-}
-
 std::vector<SemanticError> SemanticAnalyzer::getErrors() {
     return errors;
+}
+
+SourceSpan SemanticAnalyzer::getSourceSpan(const StatementNode& node) {
+    SourceSpan nodeSource;
+    nodeSource.start.line = node.location.start.line;
+    nodeSource.start.column = node.location.start.column;
+    nodeSource.end.line = node.location.end.line;
+    nodeSource.end.column = node.location.end.column;
+
+    return nodeSource;
+}
+
+bool SemanticAnalyzer::analyzeProgram() {
+    analyzeStandup(*program.standup);
+
+    return errors.empty();
 }
 
 void SemanticAnalyzer::analyzeStandup(const StandupNode& standup) {
@@ -23,11 +33,11 @@ void SemanticAnalyzer::analyzeStatement(const StatementNode& statement) {
         analyzeSection(*sectionStatement);
     } else if (const auto* dateStatement = dynamic_cast<const DateStatementNode*>(&statement)) {
         analyzeDate(*dateStatement);
-    } /*else if (const auto* tagStatement = dynamic_cast<const TagStatementNode*>(&statement)) {
+    } else if (const auto* tagStatement = dynamic_cast<const TagStatementNode*>(&statement)) {
         analyzeTag(*tagStatement);
     } else if (const auto* attendeeStatement = dynamic_cast<const AttendeeStatementNode*>(&statement)) {
         analyzeAttendee(*attendeeStatement);
-    } */
+    }
 }
 
 void SemanticAnalyzer::analyzeSection(const SectionStatementNode& section) {
@@ -73,8 +83,7 @@ void SemanticAnalyzer::analyzeDate(const DateStatementNode& date) {
         errors.push_back({
             SemanticErrorCode::InvalidDate,
             message.str(),
-            0, // todo
-            0 // todo
+            getSourceSpan(date)
         });
     }
 
@@ -89,8 +98,7 @@ void SemanticAnalyzer::analyzeDate(const DateStatementNode& date) {
         errors.push_back({
             SemanticErrorCode::InvalidDate,
             message.str(),
-            0, // todo
-            0 // todo
+            getSourceSpan(date)
         });
     }
 
@@ -104,16 +112,65 @@ void SemanticAnalyzer::analyzeDate(const DateStatementNode& date) {
         errors.push_back({
             SemanticErrorCode::InvalidDate,
             message.str(),
-            0, // todo
-            0 // todo
+            getSourceSpan(date)
         });
     }
 }
 
 void SemanticAnalyzer::analyzeTag(const TagStatementNode& tag) {
-    
+    if (tags.count(tag.value)) {
+        std::ostringstream message;
+        message
+            << "Tag has already been defined, you can not duplicate tag->"
+            << tag.value;
+
+        errors.push_back({
+            SemanticErrorCode::InvalidDate,
+            message.str(),
+            getSourceSpan(tag)
+        });
+    }
+
+    tags.insert(tag.value);
 }
 
 void SemanticAnalyzer::analyzeAttendee(const AttendeeStatementNode& attendee) {
-    
-}
+    if (attendeesByName.count(attendee.attendee)) {
+        std::ostringstream message;
+        message
+            << "Attendee has already been defined, you can not duplicate attendee->"
+            << attendee.attendee;
+
+        errors.push_back({
+            SemanticErrorCode::InvalidDate,
+            message.str(),
+            getSourceSpan(attendee)
+        });
+    }
+
+    if (attendee.alias.has_value() && attendeesByAlias.count(attendee.alias.value())) {
+        std::ostringstream message;
+        message
+            << "Attendee alias has already been defined, you can not duplicate alias->"
+            << attendee.alias.value();
+
+        errors.push_back({
+            SemanticErrorCode::InvalidDate,
+            message.str(),
+            getSourceSpan(attendee)
+        });
+    }
+
+    int id = attendees.size();
+    attendees.push_back({
+        .id = id,
+        .name = attendee.attendee,
+        .alias = attendee.alias,
+        .location = attendee.location
+    });
+
+    attendeesByName[attendee.attendee] = id;
+    if (attendee.alias.has_value()) {
+        attendeesByAlias[attendee.alias.value()] = id;
+    }
+ }

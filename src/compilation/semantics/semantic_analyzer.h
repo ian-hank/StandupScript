@@ -1,9 +1,12 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
+#include <set>
 
 #include "program_node.h"
 #include "semantic_error.h"
+#include "attendee_symbol.h"
 
 class SemanticAnalyzer {
     public:
@@ -14,8 +17,14 @@ class SemanticAnalyzer {
 
     private:
         const ProgramNode& program;
+        std::set<std::string> tags;
+        std::vector<AttendeeInfo> attendees;
+        std::unordered_map<std::string, int> attendeesByName;
+        std::unordered_map<std::string, int> attendeesByAlias;
         std::vector<SemanticError> errors;
-        
+
+        SourceSpan getSourceSpan(const StatementNode& node);   
+
         // primary block-nodes
         void analyzeStandup(const StandupNode& standup);
         void analyzeStatement(const StatementNode& statement);

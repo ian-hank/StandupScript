@@ -4,5 +4,5 @@
 
 struct ProgramNode {
     // assumes that there is only ever one standup block
-    StandupNode standup;
+    std::unique_ptr<StandupNode> standup;
 };

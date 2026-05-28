@@ -19,5 +19,6 @@ target_include_directories(standupc PRIVATE
     ${COMPILATION_DIR}/parser
     ${COMPILATION_DIR}/ast
     ${COMPILATION_DIR}/semantics
-    ${COMPILATION_DIR}/common
+    ${COMPILATION_DIR}/common/sources
+    ${COMPILATION_DIR}/common/symbols
 )
