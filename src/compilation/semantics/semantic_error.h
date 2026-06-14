@@ -5,7 +5,14 @@
 #include "source_location.h"
 
 enum class SemanticErrorCode {
-    InvalidDate,
+    InvalidDate_YearRange,
+    InvalidDate_MonthRange,
+    InvalidDate_DayRange,
+
+    AttendeeDeclared,
+    AttendeeAliasDeclared,
+    TagDeclared,
+
 };
 
 struct SemanticError {

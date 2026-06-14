@@ -23,7 +23,8 @@ class SemanticAnalyzer {
         std::unordered_map<std::string, int> attendeesByAlias;
         std::vector<SemanticError> errors;
 
-        SourceSpan getSourceSpan(const StatementNode& node);   
+        SourceSpan getSourceSpan(const StatementNode& node);
+        void addError(std::vector<SemanticError>& errors, std::string errorMessage, SemanticErrorCode errorCode, SourceSpan source);
 
         // primary block-nodes
         void analyzeStandup(const StandupNode& standup);
@@ -34,4 +35,11 @@ class SemanticAnalyzer {
         void analyzeDate(const DateStatementNode& date);
         void analyzeTag(const TagStatementNode& tag);
         void analyzeAttendee(const AttendeeStatementNode& attendee);
+        void analyzeSummary(const SummaryStatementNode& summary);
+        void analyzeNote(const NoteStatementNode& note);
+        void analyzeNDecision(const DecisionStatementNode& decision);
+        void analyzeTodo(const TodoStatementNode& todo);
+        void analyzeBlocker(const BlockerStatementNode& blocker);
+        void analyzeRisk(const RiskStatementNode& risk);
+        void analyzeLink(const LinkStatementNode& link);
 };

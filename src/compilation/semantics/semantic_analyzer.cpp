@@ -16,6 +16,14 @@ SourceSpan SemanticAnalyzer::getSourceSpan(const StatementNode& node) {
     return nodeSource;
 }
 
+void addError(std::vector<SemanticError>& errors, std::string errorMessage, SemanticErrorCode errorCode, SourceSpan source) {
+    errors.push_back({
+        errorCode,
+        errorMessage,
+        source
+    });
+}
+
 bool SemanticAnalyzer::analyzeProgram() {
     analyzeStandup(*program.standup);
 
@@ -37,6 +45,8 @@ void SemanticAnalyzer::analyzeStatement(const StatementNode& statement) {
         analyzeTag(*tagStatement);
     } else if (const auto* attendeeStatement = dynamic_cast<const AttendeeStatementNode*>(&statement)) {
         analyzeAttendee(*attendeeStatement);
+    } else if (const auto *summaryStatement = dynamic_cast<const SummaryStatementNode*>(&statement)) {
+        analyzeSummary(*summaryStatement);
     }
 }
 
@@ -81,7 +91,7 @@ void SemanticAnalyzer::analyzeDate(const DateStatementNode& date) {
             << std::to_string(DATE_LITERAL_MAXIMUM_YEAR);
 
         errors.push_back({
-            SemanticErrorCode::InvalidDate,
+            SemanticErrorCode::InvalidDate_YearRange,
             message.str(),
             getSourceSpan(date)
         });
@@ -96,7 +106,7 @@ void SemanticAnalyzer::analyzeDate(const DateStatementNode& date) {
             << std::to_string(DATE_LITERAL_MAXIMUM_MONTH);
 
         errors.push_back({
-            SemanticErrorCode::InvalidDate,
+            SemanticErrorCode::InvalidDate_MonthRange,
             message.str(),
             getSourceSpan(date)
         });
@@ -110,7 +120,7 @@ void SemanticAnalyzer::analyzeDate(const DateStatementNode& date) {
             << std::to_string(DATE_LITERAL_MAXIMUM_DAY[month]);
 
         errors.push_back({
-            SemanticErrorCode::InvalidDate,
+            SemanticErrorCode::InvalidDate_DayRange,
             message.str(),
             getSourceSpan(date)
         });
@@ -125,7 +135,7 @@ void SemanticAnalyzer::analyzeTag(const TagStatementNode& tag) {
             << tag.value;
 
         errors.push_back({
-            SemanticErrorCode::InvalidDate,
+            SemanticErrorCode::TagDeclared,
             message.str(),
             getSourceSpan(tag)
         });
@@ -142,23 +152,38 @@ void SemanticAnalyzer::analyzeAttendee(const AttendeeStatementNode& attendee) {
             << attendee.attendee;
 
         errors.push_back({
-            SemanticErrorCode::InvalidDate,
+            SemanticErrorCode::AttendeeDeclared,
             message.str(),
             getSourceSpan(attendee)
         });
     }
 
-    if (attendee.alias.has_value() && attendeesByAlias.count(attendee.alias.value())) {
-        std::ostringstream message;
-        message
-            << "Attendee alias has already been defined, you can not duplicate alias->"
-            << attendee.alias.value();
+    if (attendee.alias.has_value()) {
+        if (attendeesByAlias.count(attendee.alias.value())) {
+            std::ostringstream message;
+            message
+                << "Attendee alias has already been defined, you can not duplicate alias->"
+                << attendee.alias.value();
 
-        errors.push_back({
-            SemanticErrorCode::InvalidDate,
-            message.str(),
-            getSourceSpan(attendee)
-        });
+            errors.push_back({
+                SemanticErrorCode::AttendeeAliasDeclared,
+                message.str(),
+                getSourceSpan(attendee)
+            });
+        }
+
+        if (attendeesByName.count(attendee.alias.value())) {
+            std::ostringstream message;
+            message
+                << "Attendee alias has already been defined, you can not duplicate alias->"
+                << attendee.alias.value();
+
+            errors.push_back({
+                SemanticErrorCode::AttendeeAliasDeclared,
+                message.str(),
+                getSourceSpan(attendee)
+            });
+        }
     }
 
     int id = attendees.size();
@@ -173,4 +198,8 @@ void SemanticAnalyzer::analyzeAttendee(const AttendeeStatementNode& attendee) {
     if (attendee.alias.has_value()) {
         attendeesByAlias[attendee.alias.value()] = id;
     }
+ }
+
+ void SemanticAnalyzer::analyzeSummary(const SummaryStatementNode& summary) {
+
  }
