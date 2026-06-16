@@ -20,3 +20,4 @@ struct SemanticError {
     std::string message;
     SourceSpan location;
 };
+

@@ -6,6 +6,26 @@ std::vector<SemanticError> SemanticAnalyzer::getErrors() {
     return errors;
 }
 
+std::vector<SemanticWarning> SemanticAnalyzer::getWarnings() {
+    return warnings;
+}
+
+void SemanticAnalyzer::addError(std::vector<SemanticError>& errors, std::string errorMessage, SemanticErrorCode errorCode, SourceSpan source) {
+    errors.push_back({
+        errorCode,
+        errorMessage,
+        source
+    });
+}
+
+void SemanticAnalyzer::addWarning(std::vector<SemanticWarning>& warnings, std::string warnMessage, SemanticWarningCode warnCode, SourceSpan source) {
+    warnings.push_back({
+        warnCode,
+        warnMessage,
+        source
+    });
+}
+
 SourceSpan SemanticAnalyzer::getSourceSpan(const StatementNode& node) {
     SourceSpan nodeSource;
     nodeSource.start.line = node.location.start.line;
@@ -16,12 +36,8 @@ SourceSpan SemanticAnalyzer::getSourceSpan(const StatementNode& node) {
     return nodeSource;
 }
 
-void addError(std::vector<SemanticError>& errors, std::string errorMessage, SemanticErrorCode errorCode, SourceSpan source) {
-    errors.push_back({
-        errorCode,
-        errorMessage,
-        source
-    });
+bool SemanticAnalyzer::isWhiteSpace(std::string str) {
+    return str.find_first_not_of(' ') != std::string::npos;
 }
 
 bool SemanticAnalyzer::analyzeProgram() {
@@ -37,6 +53,7 @@ void SemanticAnalyzer::analyzeStandup(const StandupNode& standup) {
 }
 
 void SemanticAnalyzer::analyzeStatement(const StatementNode& statement) {
+    // meh i dont like this
     if (const auto* sectionStatement = dynamic_cast<const SectionStatementNode*>(&statement)) {
         analyzeSection(*sectionStatement);
     } else if (const auto* dateStatement = dynamic_cast<const DateStatementNode*>(&statement)) {
@@ -47,7 +64,19 @@ void SemanticAnalyzer::analyzeStatement(const StatementNode& statement) {
         analyzeAttendee(*attendeeStatement);
     } else if (const auto *summaryStatement = dynamic_cast<const SummaryStatementNode*>(&statement)) {
         analyzeSummary(*summaryStatement);
-    }
+    } else if (const auto *noteStatement = dynamic_cast<const NoteStatementNode*>(&statement)) {
+        analyzeNote(*noteStatement);
+    } else if (const auto *decisionStatement = dynamic_cast<const DecisionStatementNode*>(&statement)) {
+        analyzeDecision(*decisionStatement);
+    } else if (const auto *todoStatement = dynamic_cast<const TodoStatementNode*>(&statement)) {
+        analyzeTodo(*todoStatement);
+    } else if (const auto *blockerStatement = dynamic_cast<const BlockerStatementNode*>(&statement)) {
+        analyzeBlocker(*blockerStatement);
+    } else if (const auto *riskStatement = dynamic_cast<const RiskStatementNode*>(&statement)) {
+        analyzeRisk(*riskStatement);
+    } else if (const auto *linkStatement = dynamic_cast<const LinkStatementNode*>(&statement)) {
+        analyzeLink(*linkStatement);
+    } 
 }
 
 void SemanticAnalyzer::analyzeSection(const SectionStatementNode& section) {
@@ -198,8 +227,50 @@ void SemanticAnalyzer::analyzeAttendee(const AttendeeStatementNode& attendee) {
     if (attendee.alias.has_value()) {
         attendeesByAlias[attendee.alias.value()] = id;
     }
- }
+}
 
- void SemanticAnalyzer::analyzeSummary(const SummaryStatementNode& summary) {
+void SemanticAnalyzer::analyzeSummary(const SummaryStatementNode& summary) {
+    if (summary.value.empty() || isWhiteSpace(summary.value)) {
+        std::ostringstream message;
+            message << "Summary statement value must not be empty or whitespace.";
 
- }
+            errors.push_back({
+                SemanticErrorCode::AttendeeAliasDeclared,
+                message.str(),
+                getSourceSpan(summary)
+            });
+    }
+}
+
+void SemanticAnalyzer::analyzeNote(const NoteStatementNode& note) {
+    if (note.value.empty() || isWhiteSpace(note.value)) {
+        std::ostringstream message;
+            message << "Note statement value is empty or whitespace.";
+
+            warnings.push_back({
+                SemanticWarningCode::Note_IsBlankOrWhitespace,
+                message.str(),
+                getSourceSpan(note)
+            });
+    }
+}
+
+void SemanticAnalyzer::analyzeDecision(const DecisionStatementNode& summary) {
+
+}
+
+void SemanticAnalyzer::analyzeRisk(const RiskStatementNode& summary) {
+
+}
+
+void SemanticAnalyzer::analyzeTodo(const TodoStatementNode& summary) {
+    
+}
+
+void SemanticAnalyzer::analyzeBlocker(const BlockerStatementNode& summary) {
+    
+}
+
+void SemanticAnalyzer::analyzeLink(const LinkStatementNode& summary) {
+    
+}

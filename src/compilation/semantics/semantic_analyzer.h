@@ -6,6 +6,7 @@
 
 #include "program_node.h"
 #include "semantic_error.h"
+#include "semantic_warning.h"
 #include "attendee_symbol.h"
 
 class SemanticAnalyzer {
@@ -14,6 +15,7 @@ class SemanticAnalyzer {
 
         bool analyzeProgram();
         std::vector<SemanticError> getErrors();
+        std::vector<SemanticWarning> getWarnings();
 
     private:
         const ProgramNode& program;
@@ -22,9 +24,12 @@ class SemanticAnalyzer {
         std::unordered_map<std::string, int> attendeesByName;
         std::unordered_map<std::string, int> attendeesByAlias;
         std::vector<SemanticError> errors;
+        std::vector<SemanticWarning> warnings;
 
+        bool isWhiteSpace(std::string str);
         SourceSpan getSourceSpan(const StatementNode& node);
         void addError(std::vector<SemanticError>& errors, std::string errorMessage, SemanticErrorCode errorCode, SourceSpan source);
+        void addWarning(std::vector<SemanticWarning>& warnings, std::string warnMessage, SemanticWarningCode warnCode, SourceSpan source);
 
         // primary block-nodes
         void analyzeStandup(const StandupNode& standup);
@@ -37,7 +42,7 @@ class SemanticAnalyzer {
         void analyzeAttendee(const AttendeeStatementNode& attendee);
         void analyzeSummary(const SummaryStatementNode& summary);
         void analyzeNote(const NoteStatementNode& note);
-        void analyzeNDecision(const DecisionStatementNode& decision);
+        void analyzeDecision(const DecisionStatementNode& decision);
         void analyzeTodo(const TodoStatementNode& todo);
         void analyzeBlocker(const BlockerStatementNode& blocker);
         void analyzeRisk(const RiskStatementNode& risk);
